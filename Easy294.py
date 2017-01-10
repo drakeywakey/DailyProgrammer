@@ -21,20 +21,39 @@ scrabble("orppgma", "program") -> false
 # Then we can loop through all the letters in the desired word and decrement the dictionary at each point
 # if there is nothing at that letter, or if the count is down to zero, then false
 
+def get_letter_counts(letters):
+	counts = {}
+
+	# get a count of how many tiles we have of each letter
+	for letter in letters:
+		if (letter in counts):
+			counts[letter] += 1
+		else:
+			counts[letter] = 1
+
+	return counts
 
 def scrabble(tiles, word):
-	letter_counts = {}
+	letter_counts = get_letter_counts(tiles)
 
-	# get counts of how many letters we have in our tiles
-	for letter in tiles:
-		print letter
+	# at each letter in the word, see if our dictionary even has that letter
+	# --- if it does, check the how many of that letter we have
+	# --- --- if we have more than 0, decrement there and move on
+	# --- --- otherwise, we don't have enough letters for this word in our tiles
+	# --- otherwise, we don't have enough letters for this word in our tiles
+	for letter in word:
 		if (letter in letter_counts):
-			letter_counts[letter] += 1
-			print 'new count for %r' % letter_counts[letter]
+			if (letter_counts[letter] > 0):
+				letter_counts[letter] -= 1
+			else:
+				return False
 		else:
-			letter_counts[letter] = 1
-			print 'letter_counts[%r] now 1' % letter
+			return False
 
-	print letter_counts
+	# if we've made it here, we must have enough letters -- True dat
+	return True
 
-scrabble("ladilmy", 'daily')
+print scrabble("ladilmy", "daily") #-> true
+print scrabble("eerriin", "eerie") #-> false
+print scrabble("orrpgma", "program") #-> true
+print scrabble("orppgma", "program") #-> false
