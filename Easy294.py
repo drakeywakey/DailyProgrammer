@@ -45,15 +45,31 @@ def scrabble(tiles, word):
 		if (letter in letter_counts):
 			if (letter_counts[letter] > 0):
 				letter_counts[letter] -= 1
+			elif ('?' in letter_counts and letter_counts['?'] > 0):
+				letter_counts['?'] -= 1
 			else:
 				return False
 		else:
-			return False
+			# Bonus:1 allow for the wildcard character '?'
+			# Check if we have any wildcards left for use
+			# if we do, use one and continue, word is still a valid possibility
+			# otherwise, the letter we need wasn't available, and we didn't have any wildcards left
+			if ('?' in letter_counts and letter_counts['?'] > 0):
+				letter_counts['?'] -= 1
+			else:
+				return False
 
 	# if we've made it here, we must have enough letters -- True dat
 	return True
 
+# original examples
 print scrabble("ladilmy", "daily") #-> true
 print scrabble("eerriin", "eerie") #-> false
 print scrabble("orrpgma", "program") #-> true
 print scrabble("orppgma", "program") #-> false
+
+#Bonus 1 examples
+print scrabble("pizza??", "pizzazz") #-> true
+print scrabble("piizza?", "pizzazz") #-> false
+print scrabble("a??????", "program") #-> true
+print scrabble("b??????", "program") #-> false
