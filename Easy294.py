@@ -63,13 +63,49 @@ def scrabble(tiles, word):
 	return True
 
 # original examples
-print scrabble("ladilmy", "daily") #-> true
-print scrabble("eerriin", "eerie") #-> false
-print scrabble("orrpgma", "program") #-> true
-print scrabble("orppgma", "program") #-> false
+#print scrabble("ladilmy", "daily") #-> true
+#print scrabble("eerriin", "eerie") #-> false
+#print scrabble("orrpgma", "program") #-> true
+#print scrabble("orppgma", "program") #-> false
 
-#Bonus 1 examples
-print scrabble("pizza??", "pizzazz") #-> true
-print scrabble("piizza?", "pizzazz") #-> false
-print scrabble("a??????", "program") #-> true
-print scrabble("b??????", "program") #-> false
+# Bonus 1 examples
+#print scrabble("pizza??", "pizzazz") #-> true
+#print scrabble("piizza?", "pizzazz") #-> false
+#print scrabble("a??????", "program") #-> true
+#print scrabble("b??????", "program") #-> false
+
+# Bonus 2
+'''
+	Given a set of up to 20 letter tiles, determine the longest word from the enable1 English word list that can be formed using the tiles.
+	longest("dcthoyueorza") ->  "coauthored"
+	longest("uruqrnytrois") -> "turquois"
+	longest("rryqeiaegicgeo??") -> "greengrocery"
+	longest("udosjanyuiuebr??") -> "subordinately"
+	longest("vaakojeaietg????????") -> "ovolactovegetarian"
+	(For all of these examples, there is a unique longest word from the list.
+	 In the case of a tie, any word that's tied for the longest is a valid output.)
+'''
+
+# There's likely a better way to do this, but for now I think I'll just do it the ol' fashioned way --
+# check each word in the dictionary against the tiles we have, and hold onto whichever is the longest.
+
+enable1 = open('./enable1.txt')
+words = enable1.read().split()
+
+# finds the longest word in the dictionary that can be made with the given letter tiles
+def longest(tiles):
+	longest = ''
+
+	for word in words:
+		if (scrabble(tiles, word) and len(word) > len(longest)):
+			longest = word
+
+	return longest
+
+print longest("dcthoyueorza")# ->  "coauthored"
+print longest("uruqrnytrois")# -> "turquois"
+print longest("rryqeiaegicgeo??")# -> "greengrocery"
+print longest("udosjanyuiuebr??")# -> "subordinately"
+print longest("vaakojeaietg????????")# -> "ovolactovegetarian"
+
+enable1.close()
