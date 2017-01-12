@@ -21,6 +21,37 @@ scrabble("orppgma", "program") -> false
 # Then we can loop through all the letters in the desired word and decrement the dictionary at each point
 # if there is nothing at that letter, or if the count is down to zero, then false
 
+def can_make_word(counts, word):
+	# at each letter in the word, see if our dictionary even has that letter
+	# --- if it does, check the how many of that letter we have
+	# --- --- if we have more than 0, decrement there and move on
+	# --- --- otherwise, we don't have enough letters for this word in our tiles
+	# --- otherwise, we don't have enough letters for this word in our tiles
+
+	#don't want alter the actual counts dictionary, so we'll need to use a copy of it
+	countCopy = counts.copy()
+
+	for letter in word:
+		if (letter in countCopy):
+			if (countCopy[letter] > 0):
+				countCopy[letter] -= 1
+			elif ('?' in countCopy and countCopy['?'] > 0):
+				countCopy['?'] -= 1
+			else:
+				return False
+		else:
+			# Bonus:1 allow for the wildcard character '?'
+			# Check if we have any wildcards left for use
+			# if we do, use one and continue, word is still a valid possibility
+			# otherwise, the letter we need wasn't available, and we didn't have any wildcards left
+			if ('?' in countCopy and countCopy['?'] > 0):
+				countCopy['?'] -= 1
+			else:
+				return False
+
+	# if we've made it here, we must have enough letters -- True dat
+	return True
+
 def get_letter_counts(letters):
 	counts = {}
 
@@ -36,43 +67,19 @@ def get_letter_counts(letters):
 def scrabble(tiles, word):
 	letter_counts = get_letter_counts(tiles)
 
-	# at each letter in the word, see if our dictionary even has that letter
-	# --- if it does, check the how many of that letter we have
-	# --- --- if we have more than 0, decrement there and move on
-	# --- --- otherwise, we don't have enough letters for this word in our tiles
-	# --- otherwise, we don't have enough letters for this word in our tiles
-	for letter in word:
-		if (letter in letter_counts):
-			if (letter_counts[letter] > 0):
-				letter_counts[letter] -= 1
-			elif ('?' in letter_counts and letter_counts['?'] > 0):
-				letter_counts['?'] -= 1
-			else:
-				return False
-		else:
-			# Bonus:1 allow for the wildcard character '?'
-			# Check if we have any wildcards left for use
-			# if we do, use one and continue, word is still a valid possibility
-			# otherwise, the letter we need wasn't available, and we didn't have any wildcards left
-			if ('?' in letter_counts and letter_counts['?'] > 0):
-				letter_counts['?'] -= 1
-			else:
-				return False
-
-	# if we've made it here, we must have enough letters -- True dat
-	return True
+	return can_make_word(letter_counts, word)
 
 # original examples
-#print scrabble("ladilmy", "daily") #-> true
-#print scrabble("eerriin", "eerie") #-> false
-#print scrabble("orrpgma", "program") #-> true
-#print scrabble("orppgma", "program") #-> false
+print scrabble("ladilmy", "daily") #-> true
+print scrabble("eerriin", "eerie") #-> false
+print scrabble("orrpgma", "program") #-> true
+print scrabble("orppgma", "program") #-> false
 
 # Bonus 1 examples
-#print scrabble("pizza??", "pizzazz") #-> true
-#print scrabble("piizza?", "pizzazz") #-> false
-#print scrabble("a??????", "program") #-> true
-#print scrabble("b??????", "program") #-> false
+print scrabble("pizza??", "pizzazz") #-> true
+print scrabble("piizza?", "pizzazz") #-> false
+print scrabble("a??????", "program") #-> true
+print scrabble("b??????", "program") #-> false
 
 # Bonus 2
 '''
@@ -94,10 +101,11 @@ words = enable1.read().split()
 
 # finds the longest word in the dictionary that can be made with the given letter tiles
 def longest(tiles):
+	letter_counts = get_letter_counts(tiles)
 	longest = ''
 
 	for word in words:
-		if (scrabble(tiles, word) and len(word) > len(longest)):
+		if (can_make_word(letter_counts, word) and len(word) > len(longest)):
 			longest = word
 
 	return longest
