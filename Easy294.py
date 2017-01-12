@@ -21,6 +21,8 @@ scrabble("orppgma", "program") -> false
 # Then we can loop through all the letters in the desired word and decrement the dictionary at each point
 # if there is nothing at that letter, or if the count is down to zero, then false
 
+import json
+
 def can_make_word(counts, word):
 	# at each letter in the word, see if our dictionary even has that letter
 	# --- if it does, check the how many of that letter we have
@@ -28,29 +30,39 @@ def can_make_word(counts, word):
 	# --- --- otherwise, we don't have enough letters for this word in our tiles
 	# --- otherwise, we don't have enough letters for this word in our tiles
 
-	#don't want alter the actual counts dictionary, so we'll need to use a copy of it
-	countCopy = counts.copy()
+	# don't want alter the actual counts dictionary, so we'll need to use a copy of it
+	count_copy = counts.copy()
+
+	# Bonus 3: want to get a score for each letter used, so let's keep track of how many we use,
+	# and return that too if we're able to make the word
+	letters_used = { '?' : 0 }
 
 	for letter in word:
-		if (letter in countCopy):
-			if (countCopy[letter] > 0):
-				countCopy[letter] -= 1
-			elif ('?' in countCopy and countCopy['?'] > 0):
-				countCopy['?'] -= 1
+		if (letter not in letters_used):
+			letters_used[letter] = 0
+
+		if (letter in count_copy):
+			if (count_copy[letter] > 0):
+				count_copy[letter] -= 1
+				letters_used[letter] += 1
+			elif ('?' in count_copy and count_copy['?'] > 0):
+				count_copy['?'] -= 1
+				letters_used['?'] += 1
 			else:
-				return False
+				return False, letters_used
 		else:
 			# Bonus:1 allow for the wildcard character '?'
 			# Check if we have any wildcards left for use
 			# if we do, use one and continue, word is still a valid possibility
 			# otherwise, the letter we need wasn't available, and we didn't have any wildcards left
-			if ('?' in countCopy and countCopy['?'] > 0):
-				countCopy['?'] -= 1
+			if ('?' in count_copy and count_copy['?'] > 0):
+				count_copy['?'] -= 1
+				letters_used['?'] += 1
 			else:
-				return False
+				return False, letters_used
 
 	# if we've made it here, we must have enough letters -- True dat
-	return True
+	return True, letters_used
 
 def get_letter_counts(letters):
 	counts = {}
@@ -70,16 +82,16 @@ def scrabble(tiles, word):
 	return can_make_word(letter_counts, word)
 
 # original examples
-print scrabble("ladilmy", "daily") #-> true
-print scrabble("eerriin", "eerie") #-> false
-print scrabble("orrpgma", "program") #-> true
-print scrabble("orppgma", "program") #-> false
+print scrabble("ladilmy", "daily")[0] #-> true
+print scrabble("eerriin", "eerie")[0] #-> false
+print scrabble("orrpgma", "program")[0] #-> true
+print scrabble("orppgma", "program")[0] #-> false
 
 # Bonus 1 examples
-print scrabble("pizza??", "pizzazz") #-> true
-print scrabble("piizza?", "pizzazz") #-> false
-print scrabble("a??????", "program") #-> true
-print scrabble("b??????", "program") #-> false
+print scrabble("pizza??", "pizzazz")[0] #-> true
+print scrabble("piizza?", "pizzazz")[0] #-> false
+print scrabble("a??????", "program")[0] #-> true
+print scrabble("b??????", "program")[0] #-> false
 
 # Bonus 2
 '''
@@ -96,8 +108,8 @@ print scrabble("b??????", "program") #-> false
 # There's likely a better way to do this, but for now I think I'll just do it the ol' fashioned way --
 # check each word in the dictionary against the tiles we have, and hold onto whichever is the longest.
 
-enable1 = open('./enable1.txt')
-words = enable1.read().split()
+with open('enable1.txt') as dictionary:
+	words = dictionary.read().split()
 
 # finds the longest word in the dictionary that can be made with the given letter tiles
 def longest(tiles):
@@ -105,7 +117,7 @@ def longest(tiles):
 	longest = ''
 
 	for word in words:
-		if (can_make_word(letter_counts, word) and len(word) > len(longest)):
+		if (can_make_word(letter_counts, word)[0] and len(word) > len(longest)):
 			longest = word
 
 	return longest
@@ -116,4 +128,46 @@ print longest("rryqeiaegicgeo??")# -> "greengrocery"
 print longest("udosjanyuiuebr??")# -> "subordinately"
 print longest("vaakojeaietg????????")# -> "ovolactovegetarian"
 
-enable1.close()
+with open('scores.json') as scoresList:
+	scores = json.load(scoresList)
+
+# print scores
+# print scores["e"]
+
+def get_word_score(letters_used):
+	score = 0
+
+	for key in letters_used:
+		times = letters_used[key]
+		score += scores[key] * times
+
+	return score
+
+def highest(tiles):
+	letter_counts = get_letter_counts(tiles)
+	highest = ''
+	highest_score = 0
+
+	for word in words:
+		outcome = can_make_word(letter_counts, word)
+		can_make = outcome[0]
+		letters_used = outcome[1]
+		word_score = get_word_score(letters_used)
+
+		if (can_make and word_score > highest_score):
+			highest_score = word_score
+			highest = word
+
+	return highest
+
+
+
+
+print highest("dcthoyueorza") # ->  "zydeco"
+print highest("uruqrnytrois") # -> "squinty"
+print highest("rryqeiaegicgeo??") # -> "reacquiring"
+print highest("udosjanyuiuebr??") # -> "jaybirds"
+print highest("vaakojeaietg????????") # -> "straightjacketed"
+
+
+
