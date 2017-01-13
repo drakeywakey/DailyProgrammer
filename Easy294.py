@@ -131,8 +131,8 @@ print longest("vaakojeaietg????????")# -> "ovolactovegetarian"
 with open('scores.json') as scoresList:
 	scores = json.load(scoresList)
 
-# print scores
-# print scores["e"]
+# #print scores
+# #print scores["e"]
 
 def get_word_score(letters_used):
 	score = 0
@@ -152,16 +152,17 @@ def highest(tiles):
 		outcome = can_make_word(letter_counts, word)
 		can_make = outcome[0]
 		letters_used = outcome[1]
-		word_score = get_word_score(letters_used)
+		#word_score = get_word_score(letters_used)
 
-		if (can_make and word_score > highest_score):
-			highest_score = word_score
-			highest = word
+		if (can_make):
+			word_score = get_word_score(letters_used)
+			#print letter_counts
+			#print letters_used
+			if (word_score > highest_score):
+				highest_score = word_score
+				highest = word
 
 	return highest
-
-
-
 
 print highest("dcthoyueorza") # ->  "zydeco"
 print highest("uruqrnytrois") # -> "squinty"
@@ -171,3 +172,52 @@ print highest("vaakojeaietg????????") # -> "straightjacketed"
 
 
 
+# Intermediate #294 -- scoring based off of position in the word
+
+def highest_two(tiles):
+	letter_counts = get_letter_counts(tiles)
+	highest = ''
+	highest_score = 0
+
+	for word in words:
+		reverse = word
+		outcome = can_make_word(letter_counts, word)
+		can_make = outcome[0]
+		letters_used = outcome[1]
+
+		if (can_make):
+			word_score = get_word_score_two(word, letters_used)
+			if (word_score > highest_score):
+				highest_score = word_score
+				highest = word
+
+	return highest
+
+
+### IMPORTANT: to obtain the highest possible score for this word, we actually try to fill the letters
+# in reverse order --- if a letter can be used at the end of the string, and a wildcard replace
+# that letter earlier, that letter will get a higher score in the later position for this scoring system.
+def get_word_score_two(word, letters_used):
+	# this assumes we're only calling this because it is in fact possible to make this work with these letters
+	used = letters_used.copy()
+	score = 0
+
+	for idx, letter in enumerate(word[::-1]):
+		# if this is not the case, we must have used a wildcard character at that position -- adds 0, so we ignore
+		if (used[letter] > 0):
+			used[letter] -= 1
+			score += (len(word) - idx) * scores[letter]
+
+	return score
+
+print highest_two("iogsvooely")# -> 44 ("oology")
+print highest_two("seevurtfci")# -> 52 ("service")
+print highest_two("vepredequi")# -> 78 ("reequip")
+print highest_two("umnyeoumcp")# -> ???
+print highest_two("orhvtudmcz")# -> ???
+print highest_two("fyilnprtia")# -> ???
+
+print highest_two("yleualaaoitoai??????")# -> 171 ("semiautomatically")
+print highest_two("afaimznqxtiaar??????")# -> 239 ("ventriloquize")
+print highest_two("yrkavtargoenem??????")# -> ???
+print highest_two("gasfreubevuiex??????")# -> ???
